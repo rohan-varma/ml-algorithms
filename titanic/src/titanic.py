@@ -378,11 +378,36 @@ def main():
         train_err, test_err = error(dclf, X, y, test_size=split)
         train_errors.append(train_err)
         test_errors.append(test_err)
-    plt.plot(splits, train_errors)
-    plt.show()
-    plt.plot(splits, test_errors)
-    plt.show()
+    # plt.plot(splits, train_errors)
+    # plt.show()
+    # plt.plot(splits, test_errors)
+    # plt.show()
+    split_error_dict = dict(zip(splits, test_errors))
+    split, err = -1, np.inf
+    for k, v in split_error_dict.items():
+        if v < err:
+            split, err = k, v
+    print "best split found: " + str(split) + " which has test err: " + str(err)
+    # super hyperparameter tuning
+    possible_depths = np.arange(1,21)
+    possible_training_splits = np.arange(0.05, 1, 0.05)
+    possible_loss_funcs = ["gini", "entropy"]
+    best_test_error, corresponding_training_error, best_depth, best_split, best_func = np.inf, np.inf, -1, -1, None
+    for func in possible_loss_funcs:
+        for depth in possible_depths:
+            for tsplit in possible_training_splits:
+                dclf = DecisionTreeClassifier(criterion=func, max_depth=depth)
+                training_error, testing_error = error(dclf, X, y,
+                                                      test_size=tsplit)
+                if testing_error < best_test_error:
+                    best_test_error, corresponding_training_error, best_depth, best_split, best_func = testing_error, training_error, depth, tsplit, func
+    print "best testing error: " + str(best_test_error)
+    print "corresponding_training_error: " + str(corresponding_training_error)
+    print "best_depth: " + str(best_depth)
+    print "best_split: " + str(best_split)
+    print "best_func: " + str(best_func)
     
+
 
 
     ### ========== TODO : END ========== ###
