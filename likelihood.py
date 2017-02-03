@@ -9,7 +9,7 @@ def compute_likelihood(data = [], p = 0.5):
     """Computes the likelihood of bernoulli distribution.
     Params: data: array of 0's and 1's, denoting the sample data.
             p: the probability of success (outcome of 1)
-    Output: the likelihood of the data
+    Returns: the likelihood of the data
     """
     likelihood = 1
     for x in data:
@@ -25,6 +25,16 @@ def get_max_val(d):
     return max_val
 
 def generate_likelihood(data, theta):
+    """Computes the likelihood of the data assuming it is sampled from the
+    bernoulli distribution for a list of parameters theta.
+    Params:
+        data: array-like of 0/1
+        theta: list of parameters (0<= p <= 1) for which to compute likelihood
+    Returns:
+        likelihood: a list of the likelihoods corresponding to the parameters
+        likelihood_dict: a dict of likelihood: parameter pairs
+        max_val: the k, v with maximum likelihood.
+    """
     likelihood = [compute_likelihood(data, t) for t in theta]
     likelihood_dict = dict(zip(theta, likelihood))
     max_val = get_max_val(likelihood_dict)
