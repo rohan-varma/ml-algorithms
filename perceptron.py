@@ -13,7 +13,7 @@ class Perceptron(object):
 
     def activation(self, x):
         """Computes the activation of the single unit by taking the dot product
-        of the weights with the features
+        of the weights with the features.
         """
         if len(self.weights) != len(x):
             raise AttributeError("incorrect dimensions. Received "
@@ -31,8 +31,7 @@ class Perceptron(object):
         it has correctly classified an example in a row. The prediction is:
         sign(sum(perceptron_survival_weighted * sign(perceptron * input)))
         """
-        if __debug__:
-            print "doing weighted prediction"
+        print "doing weighted prediction"
         predictions = [1 if sum([perceptron[1] * (1 if np.dot(perceptron[0], x)
                                                   > 0 else -1) for perceptron in
                                                   self.perceptrons]) > 0 else -1
@@ -149,7 +148,7 @@ class Perceptron(object):
             for iters in max_iters:
                 self.train_model(X=X_train, Y=Y_train, max_iter=iters,
                                  survived_threshold=threshold)
-                X_validate = self.add_bias_unit(X_validate)
+                # X_validate = self.add_bias_unit(X_validate)
                 validation_err = \
                 self.get_error(self.weighted_prediction(X_validate), Y_validate)
                 validation_errs.append((threshold, iters, validation_err))
@@ -184,21 +183,22 @@ if __name__ == '__main__':
     X2, Y2 = np.array(X2), np.array(Y2)
     perceptron = Perceptron(num_params = X1.shape[1])
     # cross validate to find params
-    threshold, iters, _ = perceptron.cross_validate(X_train=X1, Y_train=Y1,
-                                                    X_validate=X2,
-                                                    Y_validate=Y2,
-                                                    survived_thresholds = \
-                                                     [1, 5, 10, 15, 50, 100],
-                                                     max_iters = \
-                                                     [100, 1000, 5000, 10000])
+    # threshold, iters, _ = perceptron.cross_validate(X_train=X1, Y_train=Y1,
+    #                                                 X_validate=X2,
+    #                                                 Y_validate=Y2,
+    #                                                 survived_thresholds = \
+    #                                                  [1, 5, 10, 15, 50, 100],
+    #                                                  max_iters = \
+    #                                                  [100, 1000, 5000, 10000])
+    threshold, iters = 15, 10000
 
-    print "training with hyperparameters: " + str(threshold) + \
-                    " for threshold" + " and " + str(iters) + " for maxiters."
-
-    perceptron.train_model(X=X1, Y=Y1, max_iter =iters,
-                           survived_threshold=threshold)
-    print "initial error:" + str(perceptron.get_error
-                                 (perceptron.predict_labels(X1), Y1))
+    # print "training with hyperparameters: " + str(threshold) + \
+    #                 " for threshold" + " and " + str(iters) + " for maxiters."
+    #
+    # perceptron.train_model(X=X1, Y=Y1, max_iter =iters,
+    #                        survived_threshold=threshold)
+    # print "initial error:" + str(perceptron.get_error
+    #                              (perceptron.predict_labels(X1), Y1))
     print "training model"
     perceptron.train_model(X1, Y1, max_iter=10000)
     X1, X2 = perceptron.add_bias_unit(X1), perceptron.add_bias_unit(X2)
