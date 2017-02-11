@@ -4,7 +4,7 @@ from sklearn import metrics
 import sklearn.datasets
 from sklearn.tree import DecisionTreeClassifier
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 def split_data(X, y, k = 10):
     """Splits data into k portions for k-fold CV."""
@@ -121,13 +121,15 @@ def get_best_depth(X, y, k = 10, depths = []):
          If k = X.shape[0] -1, this is leave-one-out CV.
         depths: a list of depths to consider
     Returns:
-        tuple of depth, test error indicating the depth corresponding to the lowest testing error.
+        tuple of depth, test error indicating the depth corresponding to the
+        lowest testing error.
     """
     if len(depths) == 0:
         depths.append(None)
     depth_to_err = {}
+    depth_to_train_err = {}
     for depth in depths:
-        test_errors = []
+        test_errors, train_errors = [], []
         X_split, y_split = split_data(X, y, k)
         for i in range(k):
             X_test, y_test = X_split[i], y_split[i]
@@ -138,14 +140,24 @@ def get_best_depth(X, y, k = 10, depths = []):
             dclf = DecisionTreeClassifier(criterion="entropy", max_depth=depth)
             dclf.fit(X_train, y_train)
             y_test_predictions = dclf.predict(X=X_test)
+            y_train_predictions = dclf.predict(X=X_train)
             test_error = 1 - metrics.accuracy_score(y_true=y_test,
                                                    y_pred=y_test_predictions,
                                                    normalize=True)
+            train_error = 1 - metrics.accuracy_score(y_true=y_train,
+                                                     y_pred=y_train_predictions)
             test_errors.append(test_error)
+            train_errors.append(train_error)
         # average the k performance metrics
         averaged_err = np.mean(test_errors)
+        depth_to_train_err[depth] = np.mean(train_errors)
         depth_to_err[depth] = averaged_err
     print depth_to_err
+    print depth_to_train_err
+    plt.plot(depth_to_train_err.keys(), depth_to_train_err.values())
+    plt.figure()
+    plt.plot(depth_to_err.keys(), depth_to_err.values())
+    plt.show()
     return min(depth_to_err.items(), key = lambda x: x[1])
 
 
@@ -153,12 +165,12 @@ def get_best_depth(X, y, k = 10, depths = []):
 print "running tests with decision tree"
 # test it with decision tree
 print "creating dataset"
-X, y = sklearn.datasets.make_classification(n_samples = 800, n_features=10,
-                                              n_redundant=0,
-                                              n_informative=10,
-                                              random_state=0,
-                                              n_clusters_per_class=1,
-                                              n_classes=2)
+X, y = sklearn.datasets.make_classification(n_samples = 1000, n_features=10,
+                                              n_redundant=6,
+                                              n_informative=4,
+                                              random_state=1,
+                                              n_clusters_per_class=2,
+                                              n_classes=7,)
 
 X, y = np.array(X), np.array(y)
 d_tree = DecisionTreeClassifier(criterion="entropy")
@@ -173,7 +185,7 @@ print "training CV error: " + str(train_error_cv)
 print "testing cv error: " + str(test_error_cv)
 
 print "trying to find best depth...."
-depths = np.arange(1,21)
+depths = np.arange(1,15)
 best_depth, best_test_err = get_best_depth(X=X, y=y, depths = depths)
 print "best depth found: " + str(best_depth)
 print "testing error for that: " + str(best_test_err)

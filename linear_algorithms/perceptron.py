@@ -48,7 +48,8 @@ class Perceptron(object):
 
     def update_weights_if_needed(self, x, label):
         """Implementation of perceptron "learning". If the prediction is wrong
-        (signs differ), we update the weights.
+        (signs differ), we update the weights and return false. Otherwise the
+        weights are not updated and we return True.
         """
         if self.activation(x) * label <= 0:
             self.weights = self.weights + label * x
@@ -137,24 +138,6 @@ class Perceptron(object):
         diffs = filter(lambda x: x!=0, predictions - labels)
         return 100*len(diffs)/float(len(labels))
 
-    def k_fold_cv(self, X, Y, K, survived_thresholds=[1], max_iters=[10000]):
-        """performs k-fold cross validation"""
-
-    def cross_validate(self, X_train, Y_train, X_validate, Y_validate,
-                       survived_thresholds = [1], max_iters = [10000]):
-        """Cross validation. Finds the hyperparameters that perform best."""
-        validation_errs = []
-        for threshold in survived_thresholds:
-            for iters in max_iters:
-                self.train_model(X=X_train, Y=Y_train, max_iter=iters,
-                                 survived_threshold=threshold)
-                # X_validate = self.add_bias_unit(X_validate)
-                validation_err = \
-                self.get_error(self.weighted_prediction(X_validate), Y_validate)
-                validation_errs.append((threshold, iters, validation_err))
-
-        return min(validation_errs, key=lambda x: x[2])
-
 if __name__ == '__main__':
     # create and plot a dataset
     # plt.title("multi-class classification")
@@ -181,26 +164,9 @@ if __name__ == '__main__':
     Y1 = map(lambda y: -1 if y == 0 else 1, Y1)
     X1, Y1 = np.array(X1), np.array(Y1)
     X2, Y2 = np.array(X2), np.array(Y2)
-    perceptron = Perceptron(num_params = X1.shape[1])
-    # cross validate to find params
-    # threshold, iters, _ = perceptron.cross_validate(X_train=X1, Y_train=Y1,
-    #                                                 X_validate=X2,
-    #                                                 Y_validate=Y2,
-    #                                                 survived_thresholds = \
-    #                                                  [1, 5, 10, 15, 50, 100],
-    #                                                  max_iters = \
-    #                                                  [100, 1000, 5000, 10000])
     threshold, iters = 15, 10000
-
-    # print "training with hyperparameters: " + str(threshold) + \
-    #                 " for threshold" + " and " + str(iters) + " for maxiters."
-    #
-    # perceptron.train_model(X=X1, Y=Y1, max_iter =iters,
-    #                        survived_threshold=threshold)
-    # print "initial error:" + str(perceptron.get_error
-    #                              (perceptron.predict_labels(X1), Y1))
     print "training model"
-    perceptron.train_model(X1, Y1, max_iter=10000)
+    perceptron.train_model(X1, Y1, max_iter=10000, survived_threshold = 40)
     X1, X2 = perceptron.add_bias_unit(X1), perceptron.add_bias_unit(X2)
     print "final training error: " + str(perceptron.get_error
                                (perceptron.weighted_prediction(X1), Y1))

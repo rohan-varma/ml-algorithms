@@ -346,6 +346,7 @@ def main():
     for depth in depths:
         # instantiate a classifier
         dclf = DecisionTreeClassifier(criterion="entropy", max_depth=depth)
+
         # get error
         train_err, test_err = error(dclf, X, y)
         training_errors.append(train_err)
@@ -406,7 +407,7 @@ def main():
     print "best_depth: " + str(best_depth)
     print "best_split: " + str(best_split)
     print "best_func: " + str(best_func)
-    
+
 
 
 
