@@ -137,6 +137,7 @@ def get_best_depth(X, y, k = 10, depths = []):
                                       if j!=i])
             y_train = np.concatenate([y_split[j] for j in range(len(y_split))
                                       if j!=i])
+
             dclf = DecisionTreeClassifier(criterion="entropy", max_depth=depth)
             dclf.fit(X_train, y_train)
             y_test_predictions = dclf.predict(X=X_test)
