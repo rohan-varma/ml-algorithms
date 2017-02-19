@@ -24,7 +24,7 @@ class LogisticRegression(object):
             self.weights,self.weights)
 
     def fit(self, X, y, alpha = 0.001, eps = 0.00001, max_iters = 200,
-            minibatch = True, decay_rate = 0.00001, regularize_lambda = 0.0,
+            minibatch = True, decay_rate = 0.00001, regularize_lambda = 0.5,
             early_termination = True, verbose = True):
         cost_iter = []
         cost = self.cost(X,y, regularize_lambda)
@@ -86,3 +86,13 @@ if __name__ == '__main__':
     # testing dataset
     print "test error: " + str(1 - metrics.accuracy_score(y_true=y_test, y_pred=logreg.predict(X_test)))
     print "sklearn test error: " + str(get_sklearn_scores(X_test, y_test))
+
+    mean_train_err, mean_test_err = utils.get_errors_already_split(logreg, X_train, y_train, X_test, y_test)
+    print "mean train error: " + str(mean_train_err)
+    print "mean test error: " + str(mean_test_err)
+
+    X = np.concatenate((X_train, X_test), axis = 0)
+    y = np.concatenate((y_train, y_test), axis = 0)
+    cv_train_err, cv_test_err = utils.cross_validate(logreg,X,y)
+    print "cv train error: " + str(cv_train_err)
+    print "cv test error: " + str(cv_test_err)
