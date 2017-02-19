@@ -4,49 +4,84 @@ sys.path.append('../')
 from utils import utils
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.special import expit
+import sklearn.linear_model
+from sklearn import metrics
 
 class LogisticRegression(object):
-    def __init__(self, dim=None):
+    def __init__(self, dim = None):
         if dim:
-            self.weights = np.random.uniform(-1, 1, dim)
+            self.weights = np.random.random(dim)
         else:
             self.weights = None
 
-    def fit(self, X, y, max_iters = 10000, eps = 0.0001, alpha = 0.01,
-            decay_rate = True, verbose = False):
-        # initialize weights
-        if not self.weights or self.weights.shape[0] != X.shape[1]:
-            self.weights = np.random.uniform(-1, 1, X.shape[1])
+    def sigmoid(self, z):
+        return 1.0/(1 + np.exp(-z))
 
-        for i in max_iters:
-            y_hat = self.predict(X)
-            grad = X * (y_hat - y)
-            self.weights+= -alpha * grad
-            if verbose and (i+1) % 100 ==0:
-                print "iteration: " + str(i + 1)
-                print "cost: " + str(self.cost(y_hat,y))
+    def cost(self, X, y, reg_param = None):
+        h_theta = self.sigmoid(X.dot(self.weights))
+        nll =  -np.mean(y*np.log(h_theta) + (1-y)*np.log(1-h_theta))
+        return nll if not reg_param else nll + reg_param*0.5*np.inner(
+            self.weights,self.weights)
 
-        return self
+    def fit(self, X, y, alpha = 0.001, eps = 0.00001, max_iters = 200,
+            minibatch = True, decay_rate = 0.00001, regularize_lambda = 0.5,
+            early_termination = True, verbose = True):
+        cost_iter = []
+        cost = self.cost(X,y, regularize_lambda)
+        cost_iter.append(cost)
+        for i in range(max_iters):
+            if decay_rate: alpha /= (1.0/(1 + decay_rate * i))
+            prev_cost = cost_iter[-1]
+            grad = (self.sigmoid(X.dot(self.weights)) -y).T.dot(X)
+            self.weights+=-alpha*(grad + regularize_lambda*self.weights)
+            cost = self.cost(X,y, regularize_lambda)
+            if np.abs(prev_cost - cost) < eps: break
+            cost_iter.append(cost)
+            if verbose:
+                print "epoch: " + str(i + 1)
+                print "cost: " + str(self.cost(X,y, regularize_lambda))
 
+        return self.weights, np.array(cost_iter)
 
     def predict(self, X):
-        return 1 if sigmoid(X.dot(self.weights)) > 0.5 else 0
+        probs = self.sigmoid(X.dot(self.weights))
+        predictions = np.where(probs > 0.5,1,0)
+        return predictions
 
-    def sigmoid(z):
-        return expit(z)
 
-
-    def cost(self, y_pred, y):
-        # use the average negative log likelihood as the cost.
-        n_ll = -1 * sum(map(lambda label: label * np.log(self.predict(X))
-                       + (1 - label) * np.log(1 - self.predict(X)), y))
-        return n_ll/float(y.shape[0])
-
+def get_sklearn_scores(X, y):
+    sklearn_logreg = sklearn.linear_model.LogisticRegression()
+    sklearn_logreg.fit(X,y)
+    y_pred = sklearn_logreg.predict(X)
+    return 1 - metrics.accuracy_score(y_true=y, y_pred=y_pred, normalize=True)
 
 if __name__ == '__main__':
+    # get the data
     with open('./data/pima-diabetes.txt') as f:
         whole_data = f.readlines()
-    data = np.array([item.split(",") for item in whole_data])
+    data = np.array([map(lambda z: float(z), item.split(","))
+                     for item in whole_data])
+
+    # split and norm data
     train_data, test_data = data[:int(0.8*data.shape[0])], \
     data[int(0.8*data.shape[0]):]
+    X_train, y_train = train_data[:,:-1], train_data[:,-1]
+    X_test, y_test = test_data[:,:-1], test_data[:,-1]
+    X_train = (X_train - np.mean(X_train, axis = 0)) / np.std(X_train, axis = 0)
+    X_test = (X_test - np.mean(X_test, axis = 0)) / np.std(X_test, axis = 0)
+
+    # logistic regression
+    logreg = LogisticRegression(X_train.shape[1])
+    print "initial error: " + str(1 - metrics.accuracy_score(y_train,logreg.predict(X_train)))
+    weights, cost = logreg.fit(X_train,y_train,verbose=False)
+    logreg.predict(X_train)
+    print "final error: " + str(1 - metrics.accuracy_score(y_train,logreg.predict(X_train)))
+    # plt.plot(range(len(cost)), cost)
+    # plt.show()
+
+    # using sklearn
+    print get_sklearn_scores(X_train, y_train)
+
+    # testing dataset
+    print "test error: " + str(1 - metrics.accuracy_score(y_true=y_test, y_pred=logreg.predict(X_test)))
+    print "sklearn test error: " + str(get_sklearn_scores(X_test, y_test))
