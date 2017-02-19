@@ -24,7 +24,7 @@ class LogisticRegression(object):
             self.weights,self.weights)
 
     def fit(self, X, y, alpha = 0.001, eps = 0.00001, max_iters = 200,
-            minibatch = True, decay_rate = 0.00001, regularize_lambda = 0.5,
+            minibatch = True, decay_rate = 0.00001, regularize_lambda = 0.0,
             early_termination = True, verbose = True):
         cost_iter = []
         cost = self.cost(X,y, regularize_lambda)
@@ -32,8 +32,9 @@ class LogisticRegression(object):
         for i in range(max_iters):
             if decay_rate: alpha /= (1.0/(1 + decay_rate * i))
             prev_cost = cost_iter[-1]
+            # gradient of the objective function
             grad = (self.sigmoid(X.dot(self.weights)) -y).T.dot(X)
-            self.weights+=-alpha*(grad + regularize_lambda*self.weights)
+            self.weights+=-alpha*(grad + regularize_lambda*self.weights) # add regularization param
             cost = self.cost(X,y, regularize_lambda)
             if np.abs(prev_cost - cost) < eps: break
             cost_iter.append(cost)
