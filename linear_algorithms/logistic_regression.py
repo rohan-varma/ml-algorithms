@@ -23,13 +23,24 @@ class LogisticRegression(object):
         return nll if not reg_param else nll + reg_param*0.5*np.inner(
             self.weights,self.weights)
 
-    def fit(self, X, y, alpha = 0.001, eps = 0.00001, max_iters = 200,
-            minibatch = True, decay_rate = 0.00001, regularize_lambda = 0.5,
-            early_termination = True, verbose = True):
+    def shuffle(self, X, y):
+        a = np.zeros((X.shape[0], X.shape[1] + 1))
+        a[:,-1] = y
+        a[:,:-1] = X
+        np.random.shuffle(a)
+        return a[:,:-1], a[:,-1]
+
+    def fit(self, X, y, alpha = 0.001, eps = 0.00001, max_iters = 10000,
+            minibatch = .25, decay_rate = 0.00001, regularize_lambda = 0.5,
+            early_termination = True, verbose = False):
         cost_iter = []
         cost = self.cost(X,y, regularize_lambda)
         cost_iter.append(cost)
         for i in range(max_iters):
+            if minibatch:
+                pass
+                # X, y = self.shuffle(X, y)
+                # X, y = X[:int(X.shape[0] * minibatch),:], y[:int(y.shape[0] * minibatch)]
             if decay_rate: alpha /= (1.0/(1 + decay_rate * i))
             prev_cost = cost_iter[-1]
             # gradient of the objective function
@@ -38,7 +49,7 @@ class LogisticRegression(object):
             cost = self.cost(X,y, regularize_lambda)
             if np.abs(prev_cost - cost) < eps: break
             cost_iter.append(cost)
-            if verbose:
+            if verbose and (i + 1) % 50 == 0:
                 print "epoch: " + str(i + 1)
                 print "cost: " + str(self.cost(X,y, regularize_lambda))
 
@@ -73,10 +84,11 @@ if __name__ == '__main__':
 
     # logistic regression
     logreg = LogisticRegression(X_train.shape[1])
-    print "initial error: " + str(1 - metrics.accuracy_score(y_train,logreg.predict(X_train)))
+    y_p_i = logreg.predict(X_train)
+    print "initial error: " + str(1 - metrics.accuracy_score(y_train,y_p_i))
     weights, cost = logreg.fit(X_train,y_train,verbose=False)
-    logreg.predict(X_train)
-    print "final error: " + str(1 - metrics.accuracy_score(y_train,logreg.predict(X_train)))
+    fe = logreg.predict(X_train)
+    print "final error: " + str(1 - metrics.accuracy_score(y_train,fe))
     # plt.plot(range(len(cost)), cost)
     # plt.show()
 
@@ -84,10 +96,16 @@ if __name__ == '__main__':
     print get_sklearn_scores(X_train, y_train)
 
     # testing dataset
-    print "test error: " + str(1 - metrics.accuracy_score(y_true=y_test, y_pred=logreg.predict(X_test)))
+    y_p_t = logreg.predict(X_test)
+    print "test error: " + str(1 - metrics.accuracy_score(y_true=y_test,
+                                                          y_pred=y_p_t))
     print "sklearn test error: " + str(get_sklearn_scores(X_test, y_test))
 
-    mean_train_err, mean_test_err = utils.get_errors_already_split(logreg, X_train, y_train, X_test, y_test)
+    mean_train_err, mean_test_err = utils.get_errors_already_split(logreg,
+                                                                   X_train,
+                                                                   y_train,
+                                                                   X_test,
+                                                                   y_test)
     print "mean train error: " + str(mean_train_err)
     print "mean test error: " + str(mean_test_err)
 
