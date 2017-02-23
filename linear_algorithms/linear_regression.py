@@ -24,12 +24,7 @@ class LinearRegression(object):
             print "initial cost: " + str(self.cost(X,y))
         prev_cost = self.cost(X,y)
         for i in range(max_iter):
-            X_T_X = X.T.dot(X)
-            t2 = X_T_X.dot(self.weights)
-            t3 = X.T.dot(y)
-
-            grad = t2 - t3
-            # print grad
+            grad = (X.T.dot(X)).dot(self.weights) - X.T.dot(y)
             self.weights+= -(alpha * grad)
             new_cost = self.cost(X,y)
             # if np.abs(new_cost - prev_cost) < eps:
@@ -70,4 +65,3 @@ if __name__ == '__main__':
     lr = LinearRegression()
     lr.fit(X_train, y_train)
     y_train_pred = lr.predict(X_train)
-    

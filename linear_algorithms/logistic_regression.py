@@ -44,7 +44,7 @@ class LogisticRegression(object):
             if decay_rate: alpha /= (1.0/(1 + decay_rate * i))
             prev_cost = cost_iter[-1]
             # gradient of the objective function
-            grad = (X.T.dot(X)).dot(self.weights) - X.T.dot(y)
+            grad = (self.sigmoid(X.dot(self.weights)) -y).T.dot(X)
             self.weights+=-alpha*(grad + regularize_lambda*self.weights) # add regularization param
             cost = self.cost(X,y, regularize_lambda)
             if np.abs(prev_cost - cost) < eps: break

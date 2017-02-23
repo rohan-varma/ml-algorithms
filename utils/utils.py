@@ -128,10 +128,14 @@ def get_best_depth(X, y, k = 10, depths = []):
         depths.append(None)
     depth_to_err = {}
     depth_to_train_err = {}
+    # for each depth
     for depth in depths:
         test_errors, train_errors = [], []
         X_split, y_split = split_data(X, y, k)
+        # for each of the k splits
         for i in range(k):
+            # split data into k portions, using {k -i} for training
+            # and {i} for testing
             X_test, y_test = X_split[i], y_split[i]
             X_train = np.concatenate([X_split[j] for j in range(len(X_split))
                                       if j!=i])
@@ -149,7 +153,7 @@ def get_best_depth(X, y, k = 10, depths = []):
                                                      y_pred=y_train_predictions)
             test_errors.append(test_error)
             train_errors.append(train_error)
-        # average the k performance metrics
+        # average the k performance metrics, thats the performance for this depth
         averaged_err = np.mean(test_errors)
         depth_to_train_err[depth] = np.mean(train_errors)
         depth_to_err[depth] = averaged_err
@@ -159,34 +163,35 @@ def get_best_depth(X, y, k = 10, depths = []):
     plt.figure()
     plt.plot(depth_to_err.keys(), depth_to_err.values())
     plt.show()
+    # return the depth that corresponds to the lowest training error
     return min(depth_to_err.items(), key = lambda x: x[1])
 
 
+if __name__ == '__main__':
+    print "running tests with decision tree"
+    # test it with decision tree
+    print "creating dataset"
+    X, y = sklearn.datasets.make_classification(n_samples = 1000, n_features=10,
+                                                  n_redundant=6,
+                                                  n_informative=4,
+                                                  random_state=1,
+                                                  n_clusters_per_class=2,
+                                                  n_classes=7,)
 
-print "running tests with decision tree"
-# test it with decision tree
-print "creating dataset"
-X, y = sklearn.datasets.make_classification(n_samples = 1000, n_features=10,
-                                              n_redundant=6,
-                                              n_informative=4,
-                                              random_state=1,
-                                              n_clusters_per_class=2,
-                                              n_classes=7,)
+    X, y = np.array(X), np.array(y)
+    d_tree = DecisionTreeClassifier(criterion="entropy")
+    print "training & evaluating decision tree"
+    train_err, test_err = get_train_test_error(d_tree, X, y, split=0.7)
+    print "training error: " + str(train_err)
+    print "testing error: " + str(test_err)
+    print "getting cross validation errors"
+    train_error_cv, test_error_cv = cross_validate(classifier=d_tree, X=X, y=y,
+                                                   k = 10)
+    print "training CV error: " + str(train_error_cv)
+    print "testing cv error: " + str(test_error_cv)
 
-X, y = np.array(X), np.array(y)
-d_tree = DecisionTreeClassifier(criterion="entropy")
-print "training & evaluating decision tree"
-train_err, test_err = get_train_test_error(d_tree, X, y, split=0.7)
-print "training error: " + str(train_err)
-print "testing error: " + str(test_err)
-print "getting cross validation errors"
-train_error_cv, test_error_cv = cross_validate(classifier=d_tree, X=X, y=y,
-                                               k = 10)
-print "training CV error: " + str(train_error_cv)
-print "testing cv error: " + str(test_error_cv)
-
-print "trying to find best depth...."
-depths = np.arange(1,15)
-best_depth, best_test_err = get_best_depth(X=X, y=y, depths = depths)
-print "best depth found: " + str(best_depth)
-print "testing error for that: " + str(best_test_err)
+    print "trying to find best depth...."
+    depths = np.arange(1,15)
+    best_depth, best_test_err = get_best_depth(X=X, y=y, depths = depths)
+    print "best depth found: " + str(best_depth)
+    print "testing error for that: " + str(best_test_err)
