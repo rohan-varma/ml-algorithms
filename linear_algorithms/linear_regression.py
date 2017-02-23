@@ -15,9 +15,8 @@ class LinearRegression(object):
     def normalize(X):
         return (X - np.mean(X, axis = 1)) /np.std(X, axis = 1)
 
-    def fit(X, y, max_iter = 1000, alpha = 0.01):
+    def grad_desc_fit(X, y, max_iter = 1000, alpha = 0.01):
         # normalize X
-        X = normalize(X)
         if not self.weights or self.weights.shape[0] != X.shape[1]:
             self.weights = np.random.random(X.shape[1])
         for i in range(max_iter):
@@ -27,14 +26,17 @@ class LinearRegression(object):
         return self.weights
 
 
-    def grad_desc_fit(X, y):
-        pass
+    def fit(X, y):
+        if not self.weights or self.weights.shape[0] != X.shape[1]:
+            self.weights = np.random.random(X.shape[1])
+        self.weights = np.linalg.pinv(X.T.dot(X)).dot(X.T).dot(y)
+        return self.weights
 
     def predict(X):
-        pass
+        return X.dot(self.weights)
 
     def cost(X, y):
-        pass
+        return np.dot((predict(X) - y).dot((predict(X) - y).T))
 
 
 if __name__ == '__main__':
@@ -47,4 +49,3 @@ if __name__ == '__main__':
     X = (X - np.mean(X, axis = 0))/np.std(X, axis = 0) # normalize
     X_train, X_test = X[:int(0.8 * X.shape[0])], X[int(0.8*X.shape[0]):]
     y_train, y_test = y[:int(0.8 * y.shape[0])], y[int(0.8*y.shape[0]):]
-    
