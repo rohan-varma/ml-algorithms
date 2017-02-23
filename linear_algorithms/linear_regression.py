@@ -19,11 +19,7 @@ class LinearRegression(object):
 
     def grad_desc_fit(self, X, y, max_iter = 100000, alpha = 0.001, eps = 0.00001, verbose = True):
         # make sure that x is normalized enough
-        mean, std = np.mean(X, axis = 0), np.std(X, axis = 0)
-        if mean.any() < -1 or mean.any() > 1 or std.any() > 2:
-            raise AssertionError("remember to normalize inputs!")
-        if not self.weights or self.weights.shape[0] != X.shape[1]:
-            self.weights = np.random.random(X.shape[1])
+        X = self.normalize(X)
         if verbose:
             print "initial cost: " + str(self.cost(X,y))
         prev_cost = self.cost(X,y)
@@ -72,4 +68,6 @@ if __name__ == '__main__':
     X_train, X_test = X[:int(0.8 * X.shape[0])], X[int(0.8*X.shape[0]):]
     y_train, y_test = y[:int(0.8 * y.shape[0])], y[int(0.8*y.shape[0]):]
     lr = LinearRegression()
-    lr.grad_desc_fit(X_train, y_train)
+    lr.fit(X_train, y_train)
+    y_train_pred = lr.predict(X_train)
+    
