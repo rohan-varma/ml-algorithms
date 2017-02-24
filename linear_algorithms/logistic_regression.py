@@ -3,7 +3,6 @@ import sys
 sys.path.append('../')
 from utils import utils
 import numpy as np
-import matplotlib.pyplot as plt
 import sklearn.linear_model
 from sklearn import metrics
 

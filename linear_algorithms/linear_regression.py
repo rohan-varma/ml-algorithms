@@ -3,7 +3,6 @@ import sys
 sys.path.append('../')
 from utils import utils
 import numpy as np
-import matplotlib.pyplot as plt
 import sklearn.linear_model
 from sklearn import metrics
 
@@ -16,25 +15,6 @@ class LinearRegression(object):
 
     def normalize(self, X):
         return (X - np.mean(X, axis = 0)) /np.std(X, axis = 0)
-
-    def grad_desc_fit(self, X, y, max_iter = 100000, alpha = 0.001, eps = 0.00001, verbose = True):
-        # make sure that x is normalized enough
-        X = self.normalize(X)
-        if verbose:
-            print "initial cost: " + str(self.cost(X,y))
-        prev_cost = self.cost(X,y)
-        for i in range(max_iter):
-            grad = (X.T.dot(X)).dot(self.weights) - X.T.dot(y)
-            self.weights+= -(alpha * grad)
-            new_cost = self.cost(X,y)
-            # if np.abs(new_cost - prev_cost) < eps:
-            #     break
-            # else:
-            #     prev_cost = new_cost
-        if verbose:
-            print "final cost, gradient descent: " + str(self.cost(X,y))
-        return self.weights
-
 
     def fit(self, X, y, verbose = True):
         if not self.weights or self.weights.shape[0] != X.shape[1]:

@@ -2,7 +2,6 @@
 # separates data.
 import numpy as np
 import sklearn.datasets
-import matplotlib.pyplot as plt
 
 class Perceptron(object):
     """Implementation of the perceptron algorithm for binary classification."""

@@ -16,7 +16,13 @@ class SoftmaxRegression(object):
         pass
 
     def onehot_encode(y):
-        pass
+        num_possible_labels = max(y) - min(y)
+        one_hot = np.zeros((num_possible_labels, y.shape[0]))
+        for i in range(y):
+            index = i
+            val = y[i]
+            one_hot[val, idx] = 1.0
+        return one_hot
 
     def cost(X, y):
         pass
