@@ -4,7 +4,7 @@ from sklearn import metrics
 import sklearn.datasets
 from sklearn.tree import DecisionTreeClassifier
 import numpy as np
-import matplotlib.pyplot as plt
+
 
 def split_data(X, y, k = 10):
     """Splits data into k portions for k-fold CV."""

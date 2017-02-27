@@ -16,7 +16,8 @@ class LinearAlgorithmsTests(unittest.TestCase):
         self.linear_regression = LinearRegression()
         self.logistic_regression = LogisticRegression()
         self.perceptron = Perceptron()
-        sefl.softmax_regression = SoftmaxRegression()
+        self.softmax_regression = SoftmaxRegression()
+
 
     def test(self):
         self.assertTrue(True)
