@@ -1,7 +1,8 @@
-"""Implementation of Linear Regression for binary classification."""
+"""Implementation of vanilla Linear Regression for binary classification."""
 import sys
 sys.path.append('../')
 from utils import utils
+from loss import loss
 import numpy as np
 import sklearn.linear_model
 from sklearn import metrics
@@ -29,19 +30,5 @@ class LinearRegression(object):
         return X.dot(self.weights)
 
     def cost(self, X, y):
-        return np.square(np.linalg.norm(self.predict(X)-y))/X.shape[0]
-
-
-if __name__ == '__main__':
-    with open('./data/housing.txt') as f:
-        whole_data = f.readlines()
-    data = np.array([map(lambda z: float(z), item.split())
-                     for item in whole_data])
-
-    X, y = data[:,:-1], data[:,-1] # split
-    X = (X - np.mean(X, axis = 0))/np.std(X, axis = 0) # normalize
-    X_train, X_test = X[:int(0.8 * X.shape[0])], X[int(0.8*X.shape[0]):]
-    y_train, y_test = y[:int(0.8 * y.shape[0])], y[int(0.8*y.shape[0]):]
-    lr = LinearRegression()
-    lr.fit(X_train, y_train)
-    y_train_pred = lr.predict(X_train)
+        """Return the cost function, which is the squared L2-error"""
+        return loss.squared_l2_loss(y=y, pred=self.predict(X), average=True)
