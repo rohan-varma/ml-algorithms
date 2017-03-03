@@ -10,7 +10,7 @@ Currently Implemented:
 - Perceptron algorithm
 - Voting perceptron 
 - K-Fold Cross validation to detect overfitting
-- Hyperparameter tuning with K-Fold CV
+- Hyperparameter tuning with K-Fold CV, and other stuff 
 - Logistic Regression
 - Linear Regression
 
