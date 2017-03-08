@@ -26,4 +26,21 @@ class FeatureTransformer(object):
 
     def generate_features(self, X):
         """Generates the features"""
-        X_new = np.ones(())
+        if len(X.shape) == 1:
+            X_n = np.ones((1, X.shape[0]))
+            X_n[0] = X[0]
+            X = X_n
+        X_new = []
+        for row in X:
+            cur = list(row)
+            new_row = [1]
+            new_row.append(cur)
+            if self.degree > 1:
+                for d in range(2, self.degree+1):
+                    for i in range(len(cur)):
+                        li = [(cur[i]**d) * k for k in cur]
+                        new_row.append(li)
+                # flattened = [val for sublist in new_row for val in sublist]
+            print new_row
+            X_new.append(new_row)
+        return np.array(X_new)
