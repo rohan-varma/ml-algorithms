@@ -12,7 +12,7 @@ class LossTests(unittest.TestCase):
         return True
 
     def test_cross_entropy_loss(self):
-        pass
+        
 
     def test_hinge_loss(self):
         pass

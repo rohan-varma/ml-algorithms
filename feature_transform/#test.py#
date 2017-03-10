@@ -8,4 +8,8 @@ X = ft.generate_features(X)
 for i in range(100):
     print i
 
+from sklearn.preprocessing import PolynomialFeatures()
+poly = PolynomialFeatures()
+for i in range(100):
+    
     
