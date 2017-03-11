@@ -8,7 +8,7 @@ import numpy as np
 def normalize(X):
     return (X - np.mean(X, axis = 0)) / np.std(X, axis = 0)
 
-    
+
 def split_data(X, y, k = 10):
     """Splits data into k portions for k-fold CV."""
     X_split = np.array_split(X, k)
@@ -113,6 +113,32 @@ def get_train_test_error(classifier, X, y, num_iterations = 100, split = 0.2):
     test_error /=num_iterations
     return train_error, test_error
 
+def split_data(X, y, random = False, train_proportion = 0.8):
+    """Splits the data into training and testing portions
+    Params:
+    X: feature vectors
+    y: labels
+    random: True if the data should be split randomly
+    train_proportion: The proportion of data that goes to training
+    Returns:
+    X_train, y_train, X_test, y_test, the split features and labels.
+    """
+    assert(X.shape[0] == y.shape[0])
+    if not random:
+        X_train, y_train = X[:int(train_proportion*X.shape[0]),:], y[:int(
+            train_proportion*y.shape[0])]
+        X_test, y_test = X[int(train_proportion*X.shape[0]):,:], y[int(train_proportion*y.shape[0]):]
+        return X_train, y_train, X_test, y_test
+    else:
+        X_train, y_train, X_test, y_test = [], [], [], []
+        for i in range(X.shape[0]):
+            if np.random.random() < train_proportion:
+                X_train.append(X[i])
+                y_train.append(y[i])
+            else:
+                X_test.append(X[i])
+                y_train.append(y[i])
+    return X_train, y_train, X_test, y_test
 
 def get_best_depth(X, y, k = 10, depths = []):
     """Hyperparameter tuning with grid search and k-fold CV. Finds the optimal

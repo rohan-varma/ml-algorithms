@@ -4,8 +4,6 @@ sys.path.append('../')
 from utils import utils
 from loss import loss
 import numpy as np
-import sklearn.linear_model
-from sklearn import metrics
 
 class LinearRegression(object):
     def __init__(self, dim = None, l1_lambda = None, l2_lambda = None):
@@ -36,7 +34,11 @@ class LinearRegression(object):
         return self.weights
 
     def predict(self, X):
-        return X.dot(self.weights)
+        try:
+            return X.dot(self.weights)
+        except:
+            raise ValueError("{} {}".format(X.shape, self.weights.shape))
+
 
     def cost(self, X, y):
         """Return the cost function, which is the squared L2-error"""
