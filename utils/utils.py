@@ -5,7 +5,10 @@ import sklearn.datasets
 from sklearn.tree import DecisionTreeClassifier
 import numpy as np
 
+def normalize(X):
+    return (X - np.mean(X, axis = 0)) / np.std(X, axis = 0)
 
+    
 def split_data(X, y, k = 10):
     """Splits data into k portions for k-fold CV."""
     X_split = np.array_split(X, k)
