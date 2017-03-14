@@ -9,11 +9,9 @@ def normalize(X):
     return (X - np.mean(X, axis = 0)) / np.std(X, axis = 0)
 
 
-def split_data(X, y, k = 10):
+def do_split_data(X, y, k = 10):
     """Splits data into k portions for k-fold CV."""
-    X_split = np.array_split(X, k)
-    y_split = np.array_split(y, k)
-    return X_split, y_split
+    return np.array_split(X, k), np.array_split(y, k)
 
 
 def cross_validate(classifier, X, y, k = 10):
@@ -28,10 +26,11 @@ def cross_validate(classifier, X, y, k = 10):
         mean_test_error: the mean testing error across the k splits
     """
     # split the data
-    X_split, y_split = split_data(X, y, k)
+    X_split, y_split = do_split_data(X, y, k)
     # for every k, train & evaluate a classifier
     training_errors, testing_errors = [], []
     for i in range(k):
+        print "using {} split for validation".format(i + 1)
         # train on D - D(k), test on D(k)
         X_test, y_test = X_split[i], y_split[i]
         X_train = np.concatenate([X_split[j] for j in range(len(X_split))
@@ -140,6 +139,21 @@ def split_data(X, y, random = False, train_proportion = 0.8):
                 y_train.append(y[i])
     return X_train, y_train, X_test, y_test
 
+def get_best_hyperparams_cv(X, y, k = 10, classifiers_and_params={}):
+    """Format for dict: key = classifier name,
+    values = list = [classifier object with params declared, then params]"""
+    best_train_err, best_test_err = 0.0, 0.0
+    best_params = []
+    for k, v in classifiers_and_params:
+        print "training with classifier {} and params {}".format(k, v[1:])
+        train_err, test_err = cross_validate(v[0], X, y)
+        if test_err < best_test_err:
+            print "found classifier with test error {}".format(test_err)
+            best_train_err, best_test_err = train_err, test_err
+            best_params = v[1:]
+
+    return best_train_err, best_test_err, best_params
+
 def get_best_depth(X, y, k = 10, depths = []):
     """Hyperparameter tuning with grid search and k-fold CV. Finds the optimal
     maximum depth for our classifier.
@@ -160,7 +174,7 @@ def get_best_depth(X, y, k = 10, depths = []):
     # for each depth
     for depth in depths:
         test_errors, train_errors = [], []
-        X_split, y_split = split_data(X, y, k)
+        X_split, y_split = do_split_data(X, y, k)
         # for each of the k splits
         for i in range(k):
             # split data into k portions, using {k -i} for training
