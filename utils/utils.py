@@ -5,6 +5,16 @@ import sklearn.datasets
 from sklearn.tree import DecisionTreeClassifier
 import numpy as np
 
+def onehot_encode(y):
+    """one hot encode labels into a matrix
+    Finds the range of labels r and then creates a r x y.shape matrix to onehot encode"""
+    min, max = min(y), max(y)
+    r = max - min + 1
+    Y = np.zeros((r, y.shape[0]))
+    for idx, val in enumerate(Y):
+        Y[val][idx] = 1
+    return Y
+    
 def normalize(X):
     return (X - np.mean(X, axis = 0)) / np.std(X, axis = 0)
 
