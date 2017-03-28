@@ -2,13 +2,15 @@
 # separates data.
 import numpy as np
 import sklearn.datasets
-
+from sklearn.metrics import accuracy_score
 class Perceptron(object):
     """Implementation of the perceptron algorithm for binary classification."""
     def __init__(self, num_params=0):
         if num_params > 0:
             self.weights = np.random.uniform(low=0.0,high=1.0,
                                              size=num_params+1)
+        else:
+            self.weights = np.random.random(0)
 
     def activation(self, x):
         """Computes the activation of the single unit by taking the dot product
@@ -46,9 +48,12 @@ class Perceptron(object):
         return predictions
 
     def update_weights_if_needed(self, x, label):
-        """Implementation of perceptron "learning". If the prediction is wrong
+        """Implementation of perceptron learning. If the prediction is wrong
         (signs differ), we update the weights and return false. Otherwise the
         weights are not updated and we return True.
+        If we predict incorrectly, then the update is w(n+1) = w(n) + y(n) * x(n).
+        This works since the quantity y(n)w(n+1)x(n) = y(n)( w(n) + y(n)x(n))(x(n)) = y(n)w(n)x(n)) + y(n)^2x(n)^2
+        is greater than the original prediction, so more likely to be positive, or having the same sign
         """
         if self.activation(x) * label <= 0:
             self.weights = self.weights + label * x
@@ -103,10 +108,8 @@ class Perceptron(object):
             X, Y = self.shuffle_data(X, Y)
             for i in range(len(X)):
                 feature_vector, label = X[i], Y[i]
+                weights_updated, weights = self.update_weights_if_needed(feature_vector, label)
                 if vote:
-                    # use voting algorithm
-                    weights_updated, weights = \
-                    self.update_weights_if_needed(feature_vector, label)
                     if weights_updated:
                         # possibly save the perceptron if its performed well
                         if cur_survived[1] >= survived_threshold:
@@ -114,9 +117,7 @@ class Perceptron(object):
                         cur_survived = [self.weights, 0]
                     else:
                         # the perceptron classified correctly, so update
-                        cur_survived[1]+=1
-                else:
-                    self.update_weights_if_needed(feature_vector, label)
+                        cur_survived[1] += 1
         # add the last weights
         perceptron_survivied.append(cur_survived)
 
@@ -136,6 +137,13 @@ class Perceptron(object):
         """
         diffs = filter(lambda x: x!=0, predictions - labels)
         return 100*len(diffs)/float(len(labels))
+
+
+    def acc(self, predictions, labels):
+        return accuracy_score(y_true = labels, y_pred = predictions)
+
+
+
 
 if __name__ == '__main__':
     # create and plot a dataset
@@ -165,7 +173,10 @@ if __name__ == '__main__':
     X2, Y2 = np.array(X2), np.array(Y2)
     threshold, iters = 15, 10000
     print "training model"
+    perceptron = Perceptron()
     perceptron.train_model(X1, Y1, max_iter=10000, survived_threshold = 40)
     X1, X2 = perceptron.add_bias_unit(X1), perceptron.add_bias_unit(X2)
     print "final training error: " + str(perceptron.get_error
                                (perceptron.weighted_prediction(X1), Y1))
+    print "acc: {}".format(perceptron.acc(perceptron.weighted_prediction(X1), Y1))
+
