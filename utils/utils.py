@@ -4,6 +4,8 @@ from sklearn import metrics
 import sklearn.datasets
 from sklearn.tree import DecisionTreeClassifier
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 def onehot_encode(y):
     """one hot encode labels into a matrix
