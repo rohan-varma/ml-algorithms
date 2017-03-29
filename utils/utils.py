@@ -151,20 +151,29 @@ def split_data(X, y, random = False, train_proportion = 0.8):
                 y_train.append(y[i])
     return X_train, y_train, X_test, y_test
 
-def get_best_hyperparams_cv(X, y, k = 10, classifiers_and_params={}):
-    """Format for dict: key = classifier name,
-    values = list = [classifier object with params declared, then params]"""
-    best_train_err, best_test_err = 0.0, 0.0
-    best_params = []
-    for k, v in classifiers_and_params:
-        print "training with classifier {} and params {}".format(k, v[1:])
-        train_err, test_err = cross_validate(v[0], X, y)
-        if test_err < best_test_err:
-            print "found classifier with test error {}".format(test_err)
-            best_train_err, best_test_err = train_err, test_err
-            best_params = v[1:]
 
-    return best_train_err, best_test_err, best_params
+def get_best_hyperparams_cv(X, y, k = 10, classifiers = []):
+    """Fits the specified classifiers and returns the one with the best hyperparameters
+    Params:
+    X: training data
+    Y: training labels
+    k: number of cross-validation splits (default 10)
+    classifiers: list where each element is a tupe of (classifier object to fit, list of associated params)
+    """
+    best_train_err, best_test_err, = np.inf, np.inf
+    best_params = []
+    clf = None
+    for tup in classifiers:
+        print "training with params: {}".format(tup[1])
+        train_err, test_err = cross_validate(tup[0], X=X, y=y)
+        if test_err < best_test_err:
+            print "found parameters with test error {}".format(test_err)
+            best_train_err, best_test_err = train_err, test_err
+            best_params = tup[1]
+            clf = tup[0]
+    return clf, best_params, best_test_err, best_train_err
+
+
 
 def get_best_depth(X, y, k = 10, depths = []):
     """Hyperparameter tuning with grid search and k-fold CV. Finds the optimal
@@ -214,10 +223,10 @@ def get_best_depth(X, y, k = 10, depths = []):
         depth_to_err[depth] = averaged_err
     print depth_to_err
     print depth_to_train_err
-    plt.plot(depth_to_train_err.keys(), depth_to_train_err.values())
-    plt.figure()
-    plt.plot(depth_to_err.keys(), depth_to_err.values())
-    plt.show()
+    # plt.plot(depth_to_train_err.keys(), depth_to_train_err.values())
+    # plt.figure()
+    # plt.plot(depth_to_err.keys(), depth_to_err.values())
+    # plt.show()
     # return the depth that corresponds to the lowest training error
     return min(depth_to_err.items(), key = lambda x: x[1])
 
@@ -250,3 +259,12 @@ if __name__ == '__main__':
     best_depth, best_test_err = get_best_depth(X=X, y=y, depths = depths)
     print "best depth found: " + str(best_depth)
     print "testing error for that: " + str(best_test_err)
+    print "doing classifier and parameter-agnostic search"
+
+    t1 = DecisionTreeClassifier(criterion="entropy", max_depth = 100)
+    t2 = DecisionTreeClassifier(criterion = "entropy", max_depth = 25)
+    li = [(t1, ["entropy", 10]), (t2, ["entropy", 25])]
+    clf, params, test_err, train_err = get_best_hyperparams_cv(X, y, k=10, classifiers=li)
+    print params
+
+
