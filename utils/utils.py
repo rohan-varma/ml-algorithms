@@ -26,7 +26,7 @@ def do_split_data(X, y, k = 10):
     return np.array_split(X, k), np.array_split(y, k)
 
 
-def cross_validate(classifier, X, y, k = 10, verbose = True):
+def cross_validate(classifier, X, y, k = 10, verbose = False):
     """Performs cross validation to return average training and testing error
     Params:
         classifier: a classifier with a fit(X, y) and predict(y) API
@@ -153,7 +153,7 @@ def split_data(X, y, random = False, train_proportion = 0.8):
     return X_train, y_train, X_test, y_test
 
 
-def get_best_hyperparams_cv(X, y, k = 10, classifiers = [], verbose = True):
+def get_best_hyperparams_cv(X, y, k = 10, classifiers = [], verbose = False):
     """Fits the specified classifiers and returns the one with the best hyperparameters
     Params:
     X: training data
@@ -178,7 +178,7 @@ def get_best_hyperparams_cv(X, y, k = 10, classifiers = [], verbose = True):
 
 
 
-def get_best_depth(X, y, k = 10, depths = [], verbose = True):
+def get_best_depth(X, y, k = 10, depths = [], verbose = False):
     """Hyperparameter tuning with grid search and k-fold CV. Finds the optimal
     maximum depth for our classifier.
     Params:
