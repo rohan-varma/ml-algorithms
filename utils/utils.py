@@ -26,7 +26,7 @@ def do_split_data(X, y, k = 10):
     return np.array_split(X, k), np.array_split(y, k)
 
 
-def cross_validate(classifier, X, y, k = 10):
+def cross_validate(classifier, X, y, k = 10, verbose = True):
     """Performs cross validation to return average training and testing error
     Params:
         classifier: a classifier with a fit(X, y) and predict(y) API
@@ -42,7 +42,8 @@ def cross_validate(classifier, X, y, k = 10):
     # for every k, train & evaluate a classifier
     training_errors, testing_errors = [], []
     for i in range(k):
-        print "using {} split for validation".format(i + 1)
+        if verbose:
+            print("using {} split for validation".format(i + 1))
         # train on D - D(k), test on D(k)
         X_test, y_test = X_split[i], y_split[i]
         X_train = np.concatenate([X_split[j] for j in range(len(X_split))
@@ -152,7 +153,7 @@ def split_data(X, y, random = False, train_proportion = 0.8):
     return X_train, y_train, X_test, y_test
 
 
-def get_best_hyperparams_cv(X, y, k = 10, classifiers = []):
+def get_best_hyperparams_cv(X, y, k = 10, classifiers = [], verbose = True):
     """Fits the specified classifiers and returns the one with the best hyperparameters
     Params:
     X: training data
@@ -164,10 +165,12 @@ def get_best_hyperparams_cv(X, y, k = 10, classifiers = []):
     best_params = []
     clf = None
     for tup in classifiers:
-        print "training with params: {}".format(tup[1])
+        if verbose:
+            print("training with params: {}".format(tup[1]))
         train_err, test_err = cross_validate(tup[0], X=X, y=y)
         if test_err < best_test_err:
-            print "found parameters with test error {}".format(test_err)
+            if verbose:
+                print("found params with test error: {}".format(test_err))
             best_train_err, best_test_err = train_err, test_err
             best_params = tup[1]
             clf = tup[0]
@@ -175,7 +178,7 @@ def get_best_hyperparams_cv(X, y, k = 10, classifiers = []):
 
 
 
-def get_best_depth(X, y, k = 10, depths = []):
+def get_best_depth(X, y, k = 10, depths = [], verbose = True):
     """Hyperparameter tuning with grid search and k-fold CV. Finds the optimal
     maximum depth for our classifier.
     Params:
@@ -221,8 +224,10 @@ def get_best_depth(X, y, k = 10, depths = []):
         averaged_err = np.mean(test_errors)
         depth_to_train_err[depth] = np.mean(train_errors)
         depth_to_err[depth] = averaged_err
-    print depth_to_err
-    print depth_to_train_err
+    if verbose: 
+        print(depth_to_err)
+        print(depth_to_train_err)
+
     # plt.plot(depth_to_train_err.keys(), depth_to_train_err.values())
     # plt.figure()
     # plt.plot(depth_to_err.keys(), depth_to_err.values())
@@ -232,9 +237,9 @@ def get_best_depth(X, y, k = 10, depths = []):
 
 
 if __name__ == '__main__':
-    print "running tests with decision tree"
+    print("running tests with decision tree")
+    print("creating dataset")
     # test it with decision tree
-    print "creating dataset"
     X, y = sklearn.datasets.make_classification(n_samples = 1000, n_features=10,
                                                   n_redundant=6,
                                                   n_informative=4,
@@ -244,27 +249,26 @@ if __name__ == '__main__':
 
     X, y = np.array(X), np.array(y)
     d_tree = DecisionTreeClassifier(criterion="entropy")
-    print "training & evaluating decision tree"
     train_err, test_err = get_train_test_error(d_tree, X, y, split=0.7)
-    print "training error: " + str(train_err)
-    print "testing error: " + str(test_err)
-    print "getting cross validation errors"
+    print ("training error: " + str(train_err))
+    print ("testing error: " + str(test_err))
+    print ("getting cross validation errors")
     train_error_cv, test_error_cv = cross_validate(classifier=d_tree, X=X, y=y,
                                                    k = 10)
-    print "training CV error: " + str(train_error_cv)
-    print "testing cv error: " + str(test_error_cv)
+    print ("training CV error: " + str(train_error_cv))
+    print ("testing cv error: " + str(test_error_cv))
 
-    print "trying to find best depth...."
+    print ("trying to find best depth....")
     depths = np.arange(1,15)
     best_depth, best_test_err = get_best_depth(X=X, y=y, depths = depths)
-    print "best depth found: " + str(best_depth)
-    print "testing error for that: " + str(best_test_err)
-    print "doing classifier and parameter-agnostic search"
+    print ("best depth found: " + str(best_depth))
+    print ("testing error for that: " + str(best_test_err))
+    print ("doing classifier and parameter-agnostic search")
 
     t1 = DecisionTreeClassifier(criterion="entropy", max_depth = 100)
     t2 = DecisionTreeClassifier(criterion = "entropy", max_depth = 25)
     li = [(t1, ["entropy", 10]), (t2, ["entropy", 25])]
     clf, params, test_err, train_err = get_best_hyperparams_cv(X, y, k=10, classifiers=li)
-    print params
+    print (params)
 
 
