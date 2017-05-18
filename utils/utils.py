@@ -153,7 +153,7 @@ def split_data(X, y, random = False, train_proportion = 0.8):
     return X_train, y_train, X_test, y_test
 
 
-def get_best_hyperparams_cv(X, y, k = 10, classifiers = [], verbose = False):
+def get_best_hyperparams_cv(X, y, k = 10, classifiers = [], verbose = False, optimize_for = 'accuracy'):
     """Fits the specified classifiers and returns the one with the best hyperparameters
     Params:
     X: training data
@@ -161,6 +161,7 @@ def get_best_hyperparams_cv(X, y, k = 10, classifiers = [], verbose = False):
     k: number of cross-validation splits (default 10)
     classifiers: list where each element is a tupe of (classifier object to fit, list of associated params)
     """
+    assert(optimize_for in ['accuracy', 'f1-score', 'precision', 'recall'])
     best_train_err, best_test_err, = np.inf, np.inf
     best_params = []
     clf = None
