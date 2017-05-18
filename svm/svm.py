@@ -1,7 +1,9 @@
 import numpy as np
+from utils import *
 class SVM(object):
     def __init__(self):
         pass
+
 
     def loss(y, x, weights, bias, l2_reg = 0, l1_reg = 0):
         """Implementation of regularized hinge loss for SVM
@@ -20,7 +22,10 @@ class SVM(object):
         reg_term = l1_reg * weights + l2_reg * (np.linalg.norm(weights)**2)
         return hinge_loss + reg_term
 
-    def vectorized_loss(y, x, weights, bias):
-        """Fully vectorized regularized hinge loss implementation"""
-        mult = (weights.T).dot(x) + bias
-        hinge_loss = y*x
+    def vectorized_loss(y, x, weights, bias, l2_reg = 0, l1_reg = 0):
+        """Fully vectorized regularized hinge loss implementation
+        Params: 
+        y
+        """
+        raise(NotImplementedError())
+
