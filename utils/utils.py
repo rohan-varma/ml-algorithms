@@ -6,7 +6,68 @@ from sklearn.tree import DecisionTreeClassifier
 import numpy as np
 import matplotlib.pyplot as plt
 
+def accuracy(x, y, classifier):
+    """data and classifier which has a predict() api"""
+    preds = classifier.predict(x)
+    true_positives = 0
+    true_negatives = 0
+    false_positives = 0
+    false_negatives = 0
+    for i in range(len(preds)):
+        if preds[i] == y[i]:
+            if preds[i] == 0:
+                true_negatives+=1
+            else:
+                true_positives+=1
+        elif preds[i] == 0:
+            # predicted false but should've predicted positive
+            false_negatives+=1
+        else:
+            false_positives+=1
+    return (true_positives + true_negatives) / sum([true_positives + true_negatives + false_positives + false_negatives])
 
+def sensitivity(X, y, classifier):
+    # also called recall
+    # the ratio of how many positives we successfully predicted to all of the actual positives
+    # sensitivity = recall = TP/(TP + FN)
+    preds = classifier.predict(X)
+    true_positives, false_negatives = 0, 0
+    for i in range(len(preds)):
+        if preds[i] == y[i] and preds[i] == 1:
+            true_positives+=1
+        else:
+            if preds[i] != y[i] and preds[i] == 0:
+                # false negative - it was positive but we predicted neg
+                false_negatives+=1
+    return true_positives / (true_positives + false_negatives)
+
+def specificity(X, y, classifier):
+    # similar to sensitivity/recall, but for negatives
+    # the ratio of succesfully predicted negatives to all actual negatives
+    # specificity = TN/N = TN/( TN + FP)
+    true_negatives, false_positives = 0, 0
+    preds = classifier.predict(X)
+    for i in range(len(preds)):
+        if preds[i] == y[i] and y[i] == 0:
+            true_negatives+=1
+        elif preds[i] != y[i] and preds[i] == 1:
+            false_positives+=1
+    return true_negatives / (true_negatives + false_positives)
+
+def precision(X, y, classifier):
+    # the ratio of successfully predicted positives to all PREDICTED positives (successfully or incorrectly)
+    # different from sensitivity/recall, since the denominator is how many positives we predicted versus how many actual positives there were
+    # precision = TP/(TP + FP)
+    true_positives, false_positives = 0, 0
+    preds = classifier.predict(X)
+    for i in range(len(preds)):
+        if preds[i] == y[i] and y[i] == 1:
+            true_positives+=1
+        else if preds[i] != y[i] and preds[i] == 1:
+            false_positives+=1
+    return true_positives/(true_positives + false_positives)
+        
+    
 def onehot_encode(y):
     """one hot encode labels into a matrix
     Finds the range of labels r and then creates a r x y.shape matrix to onehot encode"""
