@@ -10,13 +10,12 @@ import matplotlib.pyplot as plt
 def onehot_encode(y):
     """one hot encode labels into a matrix
     Finds the range of labels r and then creates a r x y.shape matrix to onehot encode"""
-    min, max = min(y), max(y)
-    r = max - min + 1
+    r = max(y) - min(y) + 1
     Y = np.zeros((r, y.shape[0]))
     for idx, val in enumerate(Y):
         Y[val][idx] = 1
     return Y
-    
+
 def normalize(X):
     return (X - np.mean(X, axis = 0)) / np.std(X, axis = 0)
 
@@ -25,6 +24,11 @@ def do_split_data(X, y, k = 10):
     """Splits data into k portions for k-fold CV."""
     return np.array_split(X, k), np.array_split(y, k)
 
+
+def gen_batch(data, labels, num_batches = 100):
+    assert data.shape[0] == labels.shape[0], "Houston we have a problem"
+    idx = np.random.randint(data.shape[0], size = num_batches)
+    return data[idx, :], labels[idx:, ]
 
 def cross_validate(classifier, X, y, k = 10, verbose = False):
     """Performs cross validation to return average training and testing error
@@ -225,7 +229,7 @@ def get_best_depth(X, y, k = 10, depths = [], verbose = False):
         averaged_err = np.mean(test_errors)
         depth_to_train_err[depth] = np.mean(train_errors)
         depth_to_err[depth] = averaged_err
-    if verbose: 
+    if verbose:
         print(depth_to_err)
         print(depth_to_train_err)
 
@@ -271,5 +275,3 @@ if __name__ == '__main__':
     li = [(t1, ["entropy", 10]), (t2, ["entropy", 25])]
     clf, params, test_err, train_err = get_best_hyperparams_cv(X, y, k=10, classifiers=li)
     print (params)
-
-
