@@ -28,7 +28,7 @@ def do_split_data(X, y, k = 10):
 def gen_batch(data, labels, num_batches = 100):
     assert data.shape[0] == labels.shape[0], "Houston we have a problem"
     idx = np.random.randint(data.shape[0], size = num_batches)
-    return data[idx, :], labels[idx:, ]
+    return data[idx, :], labels[idx, :]
 
 def cross_validate(classifier, X, y, k = 10, verbose = False):
     """Performs cross validation to return average training and testing error
