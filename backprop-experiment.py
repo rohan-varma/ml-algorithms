@@ -1,5 +1,4 @@
 import numpy as np
-import time
 import matplotlib.pyplot as plt
 
 w = [0, 0]
@@ -13,6 +12,7 @@ def sigmoid(x, deriv = False):
 
 def relu(x, deriv = False):
 	if deriv:
+		# assign a gradient at x = 0
 		if x == 0:
 			return 0.5
 		return 1 if x > 0 else 0
@@ -23,26 +23,29 @@ def leaky_relu(x, deriv = False):
 	if not deriv:
 		return alpha * x if x <0 else x
 	else:
+		# assign a gradient at x = 0
 		if x == 0:
 			return 0.5
 		return alpha if x < 0 else 1
 
-nonlin_function = relu # change this to test different nonlinearities
-start = time.clock()
+nonlin_function = leaky_relu # change this to test different nonlinearities
 eps = 0.001
-for i in range(10000):
-	assert len(predictions) == i and len(errors) == i
+
+for i in range(1000):
 	lin = w[0] * x[0] + w[1] * x[1] + b
-	prediction = nonlin_function(lin) # 
-	print("prediction: {}".format(prediction))
+	prediction = nonlin_function(lin) # prediction
+	if i == 0:
+		print('initial prediction: {}'.format(prediction))
 	predictions.append(prediction)
 	err = (y - prediction) ** 2
 	errors.append(err)
-	print("error: {}".format(err))
+	if i == 0: 
+		print("error: {}".format(err))
 	if abs(y-prediction) < eps:
 		break
-	dedf = -2 * (y - prediction)
-	dedl = dedf * nonlin_function(lin, deriv = True)
+	# dE/dprediction
+	dedpred = -2 * (y - prediction)
+	dedl = dedpred * nonlin_function(lin, deriv = True)
 	dedw0 = x[0] * dedl
 	dedw1 = x[1] * dedl
 	dedb = 1 * dedl
@@ -53,8 +56,6 @@ print("done at iteration {}".format(i))
 print("final parameter values w0 w1 b: {} {} {}".format(w[0], w[1], b))
 print("final prediction: {}".format(predictions[-1]))
 print("final error: {}".format((y - predictions[-1]) **2))
-end = time.clock()
-print(end - start)
 plt.plot(list(range(len(predictions))), predictions)
 plt.plot(list(range(len(errors))), errors)
-plt.show()
+#plt.show()
